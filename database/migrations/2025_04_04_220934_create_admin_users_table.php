@@ -16,6 +16,7 @@ return new class extends Migration
             $table->id();
             $table->string('username')->unique();
             $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable(); // اختياري
             $table->string('password'); // سيتم تخزين الـ Hash هنا
             $table->string('role')->default('admin'); // يمكن إضافة أدوار أخرى لاحقاً
             $table->rememberToken(); // لخاصية "تذكرني" في لوحة التحكم

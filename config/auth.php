@@ -1,69 +1,45 @@
 <?php
 
 return [
-
-    /*
-    |--------------------------------------------------------------------------
-    | Authentication Defaults
-    |--------------------------------------------------------------------------
-    |
-    | This option controls the default authentication "guard" and password
-    | reset options for your application. You may change these defaults
-    | as required, but they're a perfect start for most applications.
-    |
-    */
+    // ... الإعدادات الافتراضية ...
 
     'defaults' => [
-        'guard' => 'web',
+        // 'guard' => 'web', // اترك الافتراضي للويب العادي (إذا كان لديك)
+        'guard' => env('AUTH_GUARD', 'web'), // أو اجعله قابلاً للتغيير من .env
         'passwords' => 'users',
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Authentication Guards
-    |--------------------------------------------------------------------------
-    |
-    | Next, you may define every authentication guard for your application.
-    | Of course, a great default configuration has been defined for you
-    | here which uses session storage and the Eloquent user provider.
-    |
-    | All authentication drivers have a user provider. This defines how the
-    | users are actually retrieved out of your database or other storage
-    | mechanisms used by this application to persist your user's data.
-    |
-    | Supported: "session"
-    |
-    */
-
     'guards' => [
-        'web' => [
+        'web' => [ // الـ guard الافتراضي (لمستخدمي الموقع العاديين إن وجدوا)
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        // --- إضافة الـ Guard الخاص بالمدير ---
+        'admin' => [
+            'driver' => 'session', // نستخدم session-based auth للوحة التحكم
+            'provider' => 'admins', // يشير إلى الـ provider أدناه
+        ],
+        // --- نهاية الإضافة ---
+
+        // 'sanctum' => [ // (يبقى كما هو للـ API إذا كنت تستخدمه)
+        //     'driver' => 'sanctum',
+        //     'provider' => null,
+        // ],
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | User Providers
-    |--------------------------------------------------------------------------
-    |
-    | All authentication drivers have a user provider. This defines how the
-    | users are actually retrieved out of your database or other storage
-    | mechanisms used by this application to persist your user's data.
-    |
-    | If you have multiple user tables or models you may configure multiple
-    | sources which represent each model / table. These sources may then
-    | be assigned to any extra authentication guards you have defined.
-    |
-    | Supported: "database", "eloquent"
-    |
-    */
-
     'providers' => [
-        'users' => [
+        'users' => [ // الـ provider الافتراضي
             'driver' => 'eloquent',
             'model' => App\Models\User::class,
         ],
+
+        // --- إضافة الـ Provider الخاص بالمدير ---
+        'admins' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\AdminUser::class, // يستخدم مودل AdminUser
+        ],
+        // --- نهاية الإضافة ---
 
         // 'users' => [
         //     'driver' => 'database',
@@ -71,32 +47,22 @@ return [
         // ],
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Resetting Passwords
-    |--------------------------------------------------------------------------
-    |
-    | You may specify multiple password reset configurations if you have more
-    | than one user table or model in the application and you want to have
-    | separate password reset settings based on the specific user types.
-    |
-    | The expiry time is the number of minutes that each reset token will be
-    | considered valid. This security feature keeps tokens short-lived so
-    | they have less time to be guessed. You may change this as needed.
-    |
-    | The throttle setting is the number of seconds a user must wait before
-    | generating more password reset tokens. This prevents the user from
-    | quickly generating a very large amount of password reset tokens.
-    |
-    */
-
     'passwords' => [
+        // --- قد تحتاج لتعريف مدخل خاص بكلمات مرور المديرين إذا أردت ميزة استعادة كلمة المرور لهم ---
         'users' => [
             'provider' => 'users',
             'table' => 'password_reset_tokens',
             'expire' => 60,
             'throttle' => 60,
         ],
+        // --- مثال لمدخل خاص بالمديرين ---
+         'admins' => [
+             'provider' => 'admins', // يستخدم provider المديرين
+             'table' => 'password_reset_tokens', // يمكن استخدام نفس الجدول أو جدول منفصل
+             'expire' => 60,
+             'throttle' => 60,
+         ],
+        // --- نهاية المثال ---
     ],
 
     /*

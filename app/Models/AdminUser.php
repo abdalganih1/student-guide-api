@@ -50,7 +50,7 @@ class AdminUser extends Authenticatable // يرث من Authenticatable
      * @var array<string, string>
      */
     protected $casts = [
-        // 'email_verified_at' => 'datetime', // إذا كان لديك هذا العمود
+        'email_verified_at' => 'datetime', // إذا كان لديك هذا العمود
         'password' => 'hashed', // يضمن أن كلمة المرور يتم عمل hash لها تلقائيًا عند التعيين
     ];
 }
