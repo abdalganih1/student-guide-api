@@ -4,71 +4,73 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\GraduationProject;
-use App\Models\Specialization; // Needed for dropdowns
-use App\Models\Faculty;        // Needed for dropdowns
-use App\Http\Requests\Admin\StoreGraduationProjectRequest; // يجب إنشاؤه
-use App\Http\Requests\Admin\UpdateGraduationProjectRequest; // يجب إنشاؤه
+use App\Models\Specialization; // Needed for forms
+use App\Models\Faculty; // Needed for forms
+use App\Http\Requests\Admin\StoreGraduationProjectRequest;
+use App\Http\Requests\Admin\UpdateGraduationProjectRequest;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage; // If handling PDF uploads
 
 class AdminGraduationProjectController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request): View
     {
-        $query = GraduationProject::with(['specialization', 'supervisor']);
+        $query = GraduationProject::with(['specialization', 'supervisor']); // Eager load
 
-        // Optional Filtering
-        if($request->filled('specialization_id')) {
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('title_ar', 'like', "%{$searchTerm}%")
+                  ->orWhere('title_en', 'like', "%{$searchTerm}%")
+                  ->orWhere('student_name', 'like', "%{$searchTerm}%");
+            });
+        }
+        if ($request->filled('specialization_id')) {
             $query->where('specialization_id', $request->specialization_id);
         }
-         if($request->filled('year')) {
+        if ($request->filled('year')) {
             $query->where('year', $request->year);
         }
 
-        $projects = $query->orderBy('year', 'desc')->orderBy('specialization_id')->paginate(15);
+        $projects = $query->orderBy('year', 'desc')->orderBy('title_ar')->paginate(15);
         $specializations = Specialization::orderBy('name_ar')->pluck('name_ar', 'id');
         $years = GraduationProject::select('year')->distinct()->orderBy('year', 'desc')->pluck('year');
+
 
         return view('admin.projects.index', compact('projects', 'specializations', 'years'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(): View
     {
         $specializations = Specialization::orderBy('name_ar')->pluck('name_ar', 'id');
-        $supervisors = Faculty::orderBy('name_ar')->pluck('name_ar', 'id'); // Assuming any faculty can supervise
+        $supervisors = Faculty::orderBy('name_ar')->pluck('name_ar', 'id');
         return view('admin.projects.create', compact('specializations', 'supervisors'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreGraduationProjectRequest $request): RedirectResponse
     {
-        $validated = $request->validated();
-        GraduationProject::create($validated);
+        $validatedData = $request->validated();
+
+        // Handle PDF upload if 'pdf_url' is a file input
+        // if ($request->hasFile('pdf_file')) { // Assuming input name is 'pdf_file'
+        //     $path = $request->file('pdf_file')->store('project_pdfs', 'public');
+        //     $validatedData['pdf_url'] = $path;
+        // }
+
+        GraduationProject::create($validatedData);
+
         return redirect()->route('admin.projects.index')
-                         ->with('success', 'تمت إضافة مشروع التخرج بنجاح.');
+                         ->with('success', 'تم إضافة مشروع التخرج بنجاح.');
     }
 
-    /**
-     * Display the specified resource. (Optional)
-     public function show(GraduationProject $project): View
-     {
+    public function show(GraduationProject $project): View
+    {
         $project->load(['specialization', 'supervisor']);
-        return view('admin.projects.show', compact('project'));
-     }
-     */
+        return view('admin.projects.show', compact('project')); // Create this view if needed
+    }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(GraduationProject $project): View
     {
         $specializations = Specialization::orderBy('name_ar')->pluck('name_ar', 'id');
@@ -76,29 +78,41 @@ class AdminGraduationProjectController extends Controller
         return view('admin.projects.edit', compact('project', 'specializations', 'supervisors'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(UpdateGraduationProjectRequest $request, GraduationProject $project): RedirectResponse
     {
-        $validated = $request->validated();
-        $project->update($validated);
+        $validatedData = $request->validated();
+
+        // Handle PDF update/replacement if 'pdf_url' is a file input
+        // if ($request->hasFile('pdf_file')) {
+        //     // Delete old PDF if it exists
+        //     if ($project->pdf_url && Storage::disk('public')->exists($project->pdf_url)) {
+        //         Storage::disk('public')->delete($project->pdf_url);
+        //     }
+        //     $path = $request->file('pdf_file')->store('project_pdfs', 'public');
+        //     $validatedData['pdf_url'] = $path;
+        // }
+
+        $project->update($validatedData);
+
         return redirect()->route('admin.projects.index')
-                         ->with('success', 'تم تعديل مشروع التخرج بنجاح.');
+                         ->with('success', 'تم تحديث مشروع التخرج بنجاح.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(GraduationProject $project): RedirectResponse
     {
         try {
+            // Delete associated PDF file first
+            // if ($project->pdf_url && Storage::disk('public')->exists($project->pdf_url)) {
+            //     Storage::disk('public')->delete($project->pdf_url);
+            // }
+
             $project->delete();
             return redirect()->route('admin.projects.index')
                              ->with('success', 'تم حذف مشروع التخرج بنجاح.');
         } catch (\Exception $e) {
-            return redirect()->route('admin.projects.index')
-                             ->with('error', 'حدث خطأ أثناء حذف المشروع: ' . $e->getMessage());
+             \Log::error("Error deleting project: " . $e->getMessage());
+             return redirect()->route('admin.projects.index')
+                             ->with('error', 'حدث خطأ أثناء حذف المشروع.');
         }
     }
 }

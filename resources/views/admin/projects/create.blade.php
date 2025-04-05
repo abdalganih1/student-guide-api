@@ -44,22 +44,28 @@
                     </div>
                 </div>
 
-                 <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label for="year" class="form-label">سنة التخرج <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control @error('year') is-invalid @enderror" id="year" name="year" value="{{ old('year', date('Y')) }}" required min="2000" max="{{ date('Y') + 2 }}">
-                        @error('year') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                    </div>
-                     <div class="col-md-4 mb-3">
-                         <label for="semester" class="form-label">الفصل الدراسي <span class="text-danger">*</span></label>
-                         <select class="form-select @error('semester') is-invalid @enderror" id="semester" name="semester" required>
-                            <option value="" disabled selected>-- اختر الفصل --</option>
-                            <option value="خريف" {{ old('semester') == 'خريف' ? 'selected' : '' }}>خريف</option>
-                            <option value="ربيع" {{ old('semester') == 'ربيع' ? 'selected' : '' }}>ربيع</option>
-                            <option value="صيف" {{ old('semester') == 'صيف' ? 'selected' : '' }}>صيف</option>
-                        </select>
-                         @error('semester') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                    </div>
+                <div class="row">
+    <div class="col-md-6 mb-3">
+        <label for="year" class="form-label">السنة <span class="text-danger">*</span></label>
+        <input type="number" class="form-control @error('year') is-invalid @enderror" id="year" name="year" value="{{ old('year', date('Y')) }}" required min="2000">
+        @error('year')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+    {{-- حقل الفصل الدراسي الجديد --}}
+    <div class="col-md-6 mb-3">
+        <label for="semester" class="form-label">الفصل الدراسي <span class="text-danger">*</span></label>
+        <select class="form-select @error('semester') is-invalid @enderror" id="semester" name="semester" required>
+            <option value="" disabled {{ old('semester') ? '' : 'selected' }}>-- اختر الفصل --</option>
+            <option value="خريف" {{ old('semester') == 'خريف' ? 'selected' : '' }}>خريف</option>
+            <option value="ربيع" {{ old('semester') == 'ربيع' ? 'selected' : '' }}>ربيع</option>
+            <option value="صيف" {{ old('semester') == 'صيف' ? 'selected' : '' }}>صيف</option> {{-- اختياري --}}
+            {{-- أضف فصول أخرى إذا لزم الأمر --}}
+        </select>
+        @error('semester')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
                      <div class="col-md-4 mb-3">
                          <label for="student_name" class="form-label">اسم الطالب/الطلاب</label>
                         <input type="text" class="form-control @error('student_name') is-invalid @enderror" id="student_name" name="student_name" value="{{ old('student_name') }}">

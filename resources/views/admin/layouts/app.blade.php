@@ -12,7 +12,8 @@
 
     {{-- يمكنك إضافة ملف CSS مخصص هنا --}}
     <link rel="stylesheet" href="{{ asset('css/admin-styles.css') }}"> {{-- مثال --}}
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="{{ asset('vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet" type="text/css">
     <style>
         body { display: flex; min-height: 100vh; flex-direction: column; }
         .wrapper { display: flex; flex: 1; }

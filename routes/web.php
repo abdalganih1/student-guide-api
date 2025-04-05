@@ -51,7 +51,7 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
     Route::resource('faculty', AdminFacultyController::class);
 
     // إدارة وسائط الجامعة (قد تحتاج فقط لـ index, create, store, destroy)
-    Route::resource('media', AdminUniversityMediaController::class)->except(['show', 'edit', 'update']); // استثناء العمليات غير المستخدمة
+    Route::resource('media', AdminUniversityMediaController::class);
 
     // إدارة مشاريع التخرج (CRUD)
     Route::resource('projects', AdminGraduationProjectController::class);
